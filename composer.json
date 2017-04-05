@@ -1,0 +1,19 @@
+{
+    "name": "buchlst/pdlibrary",
+    "description": "Purchase Documents library providing a PHP API for performing actions on PDs using SAPNWRFC",
+    "license": "proprietary",
+    "type": "project",
+    "require": {
+        "php": "^7.0",
+        "ext-sapnwrfc": "*"
+    },
+    "require-dev": {
+        "psy/psysh": "dev-master",
+        "phpunit/phpunit": "~5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SAP\\PDLibrary\\": "src/"
+        }
+    }
+}
