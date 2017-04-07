@@ -1,12 +1,12 @@
 # PurchaseDocument change PHP library
 
 This library is intented to provide a means for PHP 7 developers to easily peforme operations on Purchase Documents SAP items using BAPI RFC function modules:
-- (https://www.sapdatasheet.org/abap/func/bapi_po_change.html)[BAPI_PO_CHANGE]
-- (https://www.sapdatasheet.org/abap/func/BAPI_PO_GETDETAIL.html)[BAPI_PO_GETDETAIL]
-- (https://www.sapdatasheet.org/abap/func/BAPI_CONTRACT_CHANGE.html)[BAPI_CONTRACT_CHANGE]
-- (https://www.sapdatasheet.org/abap/func/BAPI_CONTRACT_GETDETAIL.html)[BAPI_CONTRACT_GETDETAIL]
-- (https://www.sapdatasheet.org/abap/func/BAPI_SAG_CHANGE.html)[BAPI_SAG_CHANGE]
-- (https://www.sapdatasheet.org/abap/func/BAPI_SAG_GETDETAIL.html)[BAPI_SAG_GETDETAIL]
+- [BAPI_PO_CHANGE](https://www.sapdatasheet.org/abap/func/bapi_po_change.html)
+- [BAPI_PO_GETDETAIL](https://www.sapdatasheet.org/abap/func/BAPI_PO_GETDETAIL.html)
+- [BAPI_CONTRACT_CHANGE](https://www.sapdatasheet.org/abap/func/BAPI_CONTRACT_CHANGE.html)
+- [BAPI_CONTRACT_GETDETAIL](https://www.sapdatasheet.org/abap/func/BAPI_CONTRACT_GETDETAIL.html)
+- [BAPI_SAG_CHANGE](https://www.sapdatasheet.org/abap/func/BAPI_SAG_CHANGE.html)
+- [BAPI_SAG_GETDETAIL](https://www.sapdatasheet.org/abap/func/BAPI_SAG_GETDETAIL.html)
 
 ## Disclaimer
 
