@@ -66,6 +66,13 @@ abstract class PurchaseDocument
     protected $itemKey = 'ITEM_NO';
 
     /**
+     * Item delition field name in the 
+     * 
+     * @var string
+     */
+    protected $itemDeletionKey = 'DELETE_IND';
+
+    /**
      * Item table.
      * 
      * @var string
@@ -78,6 +85,13 @@ abstract class PurchaseDocument
      * @var string
      */
     protected $conditionTable = 'ITEM_CONDITION';
+
+    /**
+     * Condition serial key.
+     * 
+     * @var string
+     */
+    protected $conditionKey = 'SERIAL_ID';
 
     /**
      * Condition validity table.
@@ -173,27 +187,30 @@ abstract class PurchaseDocument
         // Create an assoc array with serial_id => condition
         foreach ($table as $key => $condition) {
             // Realloc the condition.
-            $table[$condition['SERIAL_ID']] = $condition;
+            $table[$condition[$this->conditionKey]] = $condition;
             unset($table[$key]);
         }
 
         // Get a reference to the condition validity  table.
         $table = &$this->data[$this->conditionValidityTable];
 
-        // Create an assoc array with item_no => validities
-        foreach ($table as $key => $validity) {
-            // Get the item key.
-            $item = $validity[$this->itemKey];
+        if ($table) {
+            // Create an assoc array with item_no => validities
+            foreach ($table as $key => $validity) {
+                // Get the item key.
+                $item = $validity[$this->itemKey];
 
-            // Initialize the array.
-            if (!isset($table[$item])) {
-                $table[$item] = [];
+                // Initialize the array.
+                if (!isset($table[$item])) {
+                    $table[$item] = [];
+                }
+
+                // Append the validity.
+                $table[$item][] = $validity;
+                unset($table[$key]);
             }
-
-            // Append the validity.
-            $table[$item][] = $validity;
-            unset($table[$key]);
         }
+        
 
         if ($this->trace) {
             print(date('[H:i:s] ') . 'Finished parsing' . ' MB' . PHP_EOL);
@@ -229,7 +246,7 @@ abstract class PurchaseDocument
         $validity = $this->getConditionValidity($item);
 
         // Return the condition.
-        return $this->data[$this->conditionTable][$validity['SERIAL_ID']];
+        return $this->data[$this->conditionTable][$validity[$this->conditionKey]];
     }
 
     /**
@@ -305,6 +322,43 @@ abstract class PurchaseDocument
         $this->addChangeParameters($this->itemTable, $values, [$this->itemKey]);
 
         return $this;
+    }
+
+    /**
+     * Adds the specifed item with deletion to change parameters.
+     * 
+     * @param string $item 
+     * @param string $flag
+     *  
+     * @return void
+     */
+    public function deleteItem($item, $flag = 'X')
+    {   
+        return $this->updateItem($item, [$this->itemDeletionKey => $flag]);
+    }
+
+    /**
+     * Adds the specifed item with lock to change parameters.
+     * 
+     * @param string $item 
+     *  
+     * @return void
+     */
+    public function lockItem($item)
+    {   
+        return $this->deleteItem($item, 'S');
+    }
+
+    /**
+     * Adds the specifed item with unlock to change parameters.
+     * 
+     * @param string $item 
+     *  
+     * @return void
+     */
+    public function unlockItem($item)
+    {   
+        return $this->deleteItem($item, '');
     }
 
     /**

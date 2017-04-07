@@ -11,7 +11,9 @@
     ],
     "require": {
         "php": "^7.0",
-        "ext-sapnwrfc": "*"
+        "ext-sapnwrfc": "*",
+        "illuminate/support": "~5.4",
+        "vlucas/phpdotenv": "~2.2"
     },
     "require-dev": {
         "psy/psysh": "dev-master",
