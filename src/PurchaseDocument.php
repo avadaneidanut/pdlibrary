@@ -19,6 +19,11 @@ abstract class PurchaseDocument
     protected $sap;
 
     /**
+     * @var boolean
+     */
+    protected $trace;
+
+    /**
      * Purchasing document SAP key
      * 
      * @var string
@@ -116,6 +121,7 @@ abstract class PurchaseDocument
         // Store properties.
         $this->sap = $sap;
         $this->number = $number;
+        $this->trace = $trace;
 
         // Sync the data.
         if ($sync) {
@@ -138,15 +144,19 @@ abstract class PurchaseDocument
         // Add number to parameters.
         $this->syncParameters[$this->numberKey] = $this->number;
 
-        print(date('[H:i:s] ') . 'Syncing ' . $this->number . PHP_EOL);
-        print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
+        if ($this->trace) {
+            print(date('[H:i:s] ') . 'Syncing ' . $this->number . PHP_EOL);
+            print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
+        }
 
         // If data null, execute RFC.
         $this->data = $data ? $data : $this->call($this->bapiGetDetail, $this->syncParameters);
 
-        print(date('[H:i:s] ') . 'Parsing the data'. PHP_EOL);
-        print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
-        
+        if ($this->trace) {
+            print(date('[H:i:s] ') . 'Parsing the data'. PHP_EOL);
+            print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
+        }
+
         // Parse the data.
         // Get a reference to the condition table.
         $table = &$this->data[$this->itemTable];
@@ -185,7 +195,10 @@ abstract class PurchaseDocument
             unset($table[$key]);
         }
 
-        print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
+        if ($this->trace) {
+            print(date('[H:i:s] ') . 'Finished parsing' . ' MB' . PHP_EOL);
+            print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
+        }
 
         return true;
     }
