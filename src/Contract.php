@@ -107,7 +107,7 @@ class Contract extends PurchaseDocument
                 $this->itemKey => Str::pad($item, 5),
                 'VALID_FROM' => $validity,
                 'VALID_TO' => '99991231',
-                'SERIAL_ID' => (string)$this->serialId,
+                'SERIAL_ID' => (string)$this->conditionSerialId,
             ],
             [$this->itemKey],
             ['SERIAL_ID'],
