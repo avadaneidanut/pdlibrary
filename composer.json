@@ -1,11 +1,16 @@
 {
-    "name": "buchlst/pdlibrary",
+    "name": "avadaneidanut/pdlibrary",
     "description": "Purchase Documents library providing a PHP API for performing actions on PDs using SAPNWRFC",
-    "license": "proprietary",
-    "type": "project",
+    "license": "MIT",
+    "keywords": ["sap", "sapnwrfcc", "bapi"],
+    "authors": [
+        {
+            "name": "Avadanei Danut",
+            "email": "danut@worldit.info"
+        }
+    ],
     "require": {
-        "php": "7.*",
-        "illuminate/support": "5.*",
+        "php": "^7.0",
         "ext-sapnwrfc": "*"
     },
     "require-dev": {
