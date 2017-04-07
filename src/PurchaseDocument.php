@@ -138,11 +138,14 @@ abstract class PurchaseDocument
         // Add number to parameters.
         $this->syncParameters[$this->numberKey] = $this->number;
 
+        print(date('[H:i:s] ') . 'Syncing ' . $this->number . PHP_EOL);
+
         // If data null, execute RFC.
         $this->data = $data ? $data : $this->call($this->bapiGetDetail, $this->syncParameters);
 
         // Parse the data.
         foreach ($this->data as $key => $table) {
+            print(date('[H:i:s] ') . 'Loaded ' . $key . PHP_EOL);
             if (is_array($table)) {
                 $this->data[$key] = collect($table);
             }
@@ -201,7 +204,7 @@ abstract class PurchaseDocument
      */
     public function getItems()
     {
-        return $this->data[$this->conditionTable];
+        return $this->data[$this->itemTable];
     }
 
     /**
