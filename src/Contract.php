@@ -32,6 +32,18 @@ class Contract extends PurchaseDocument
     ];
 
     /**
+     * Array used for executing change RFC. Contains defaults.
+     * 
+     * @var array
+     */
+    protected $changeParameters = [
+        'TECHNICAL_DATA' => [
+            'NO_MESSAGING' => 'X',
+            'NO_MESSAGE_REQ' => 'X',
+        ],
+    ];
+
+    /**
      * Create a new condition with reference.
      * 
      * @param string $item Contract item

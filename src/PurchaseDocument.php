@@ -277,13 +277,14 @@ abstract class PurchaseDocument
         // Get a reference to the table.
         $table = &$this->data[$this->conditionValidityTable][Str::pad($item, 5)];
 
-        // Search for the validity.
-        foreach ($table as $key => $validity) {
-            if ($validity['VALID_TO'] == '99991231') {
-                return $validity;
+        if ($table) {
+            // Search for the validity.
+            foreach ($table as $key => $validity) {
+                if ($validity['VALID_TO'] == '99991231') {
+                    return $validity;
+                }
             }
         }
-
         throw new \Exception("None condition validities found for $item item.");
     }
 
