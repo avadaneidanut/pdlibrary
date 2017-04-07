@@ -139,18 +139,54 @@ abstract class PurchaseDocument
         $this->syncParameters[$this->numberKey] = $this->number;
 
         print(date('[H:i:s] ') . 'Syncing ' . $this->number . PHP_EOL);
+        print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
 
         // If data null, execute RFC.
         $this->data = $data ? $data : $this->call($this->bapiGetDetail, $this->syncParameters);
 
-        // Parse the data.
-        foreach ($this->data as $key => $table) {
-            print(date('[H:i:s] ') . 'Loaded ' . $key . PHP_EOL);
-            if (is_array($table)) {
-                $this->data[$key] = collect($table);
-            }
-        }
+        print(date('[H:i:s] ') . 'Parsing the data'. PHP_EOL);
+        print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
         
+        // Parse the data.
+        // Get a reference to the condition table.
+        $table = &$this->data[$this->itemTable];
+
+        // Create an assoc array with item_no => item
+        foreach ($table as $key => $item) {
+            $table[$item[$this->itemKey]] = $item;
+            unset($table[$key]);
+        }
+
+        // Get a reference to the condition table.
+        $table = &$this->data[$this->conditionTable];
+
+        // Create an assoc array with serial_id => condition
+        foreach ($table as $key => $condition) {
+            // Realloc the condition.
+            $table[$condition['SERIAL_ID']] = $condition;
+            unset($table[$key]);
+        }
+
+        // Get a reference to the condition validity  table.
+        $table = &$this->data[$this->conditionValidityTable];
+
+        // Create an assoc array with item_no => validities
+        foreach ($table as $key => $validity) {
+            // Get the item key.
+            $item = $validity[$this->itemKey];
+
+            // Initialize the array.
+            if (!isset($table[$item])) {
+                $table[$item] = [];
+            }
+
+            // Append the validity.
+            $table[$item][] = $validity;
+            unset($table[$key]);
+        }
+
+        print(date('[H:i:s] ') . (memory_get_peak_usage(false)/1024/1024) . ' MB' . PHP_EOL);
+
         return true;
     }
 
@@ -163,9 +199,7 @@ abstract class PurchaseDocument
      */
     public function getItem($item)
     {
-        return $this->data[$this->itemTable]
-            ->where($this->itemKey, Str::pad($item, 5))
-            ->first();
+        return $this->data[$this->itemTable][Str::pad($item, 5)];
     }
 
     /**
@@ -182,9 +216,7 @@ abstract class PurchaseDocument
         $validity = $this->getConditionValidity($item);
 
         // Return the condition.
-        return $this->data[$this->conditionTable]
-            ->where('SERIAL_ID', $validity['SERIAL_ID'])
-            ->first();
+        return $this->data[$this->conditionTable][$validity['SERIAL_ID']];
     }
 
     /**
@@ -229,17 +261,17 @@ abstract class PurchaseDocument
      */
     public function getConditionValidity($item)
     {
-        $validities = $this->data[$this->conditionValidityTable]
-            ->filter(function ($validity) use ($item) {
-                return $validity[$this->itemKey] == Str::pad($item, 5)
-                    && $validity['VALID_TO'] == '99991231';
-            });
+        // Get a reference to the table.
+        $table = &$this->data[$this->conditionValidityTable][Str::pad($item, 5)];
 
-        if ($validities->count() !== 1) {
-            throw new \Exception("Multiple/None condition/s validities found for $item item.");
+        // Search for the validity.
+        foreach ($table as $key => $validity) {
+            if ($validity['VALID_TO'] == '99991231') {
+                return $validity;
+            }
         }
 
-        return $validities->first();
+        throw new \Exception("None condition validities found for $item item.");
     }
 
     /**
