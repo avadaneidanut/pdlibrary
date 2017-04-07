@@ -403,6 +403,7 @@ abstract class PurchaseDocument
      * @param array $values 
      * @param array $ignore
      * @param array $unset 
+     * @param array $set 
      * @param bool $x
      *  
      * @return void
@@ -412,6 +413,7 @@ abstract class PurchaseDocument
         array $values,
         array $ignore = [],
         array $unset = [],
+        array $set = [],
         $x = true
     )
     {
@@ -443,10 +445,11 @@ abstract class PurchaseDocument
      * @param array $table 
      * @param array $ignore 
      * @param array $unset
+     * @param array $set
      *  
      * @return array
      */
-    protected function xTable(array $table, array $ignore = [], array $unset = [])
+    protected function xTable(array $table, array $ignore = [], array $unset = [], array $set = [])
     {
         foreach ($table as $key => $value) {
             // Unset check.
@@ -460,6 +463,10 @@ abstract class PurchaseDocument
                 continue;
             }
 
+            $table[$key] = 'X';
+        }
+
+        foreach ($set as $key) {
             $table[$key] = 'X';
         }
 

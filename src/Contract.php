@@ -44,6 +44,13 @@ class Contract extends PurchaseDocument
     ];
 
     /**
+     * Serial id for bypassing BAPI error.
+     * 
+     * @var integer
+     */
+    protected $conditionSerialId = 1;
+
+    /**
      * Create a new condition with reference.
      * 
      * @param string $item Contract item
@@ -59,7 +66,7 @@ class Contract extends PurchaseDocument
 
         // Add new values
         $condition = $this->clearNewCondition(array_merge(
-            $condition,
+            array_merge($condition, ['SERIAL_ID' => (string)$this->conditionSerialId]),
             $data,
             ['CHANGE_ID' => 'I']
         ));
@@ -69,11 +76,15 @@ class Contract extends PurchaseDocument
             $this->conditionTable,
             $condition,
             [$this->itemKey, 'COND_COUNT'],
-            ['CHANGE_ID']
+            ['CHANGE_ID', 'SERIAL_ID'],
+            ['ITEM_NOX']
         );
 
         // Add the validity.
         $this->newConditionValidity($item, $validity);
+
+        // Increment the conditionSerialId.
+        $this->conditionSerialId++;
     }
 
     /**
@@ -96,8 +107,11 @@ class Contract extends PurchaseDocument
                 $this->itemKey => Str::pad($item, 5),
                 'VALID_FROM' => $validity,
                 'VALID_TO' => '99991231',
+                'SERIAL_ID' => (string)$this->serialId,
             ],
-            [$this->itemKey]
+            [$this->itemKey],
+            ['SERIAL_ID'],
+            ['ITEM_NOX']
         );
     }
 
