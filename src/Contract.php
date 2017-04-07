@@ -65,11 +65,11 @@ class Contract extends PurchaseDocument
         $condition = $this->getCondition($item);
 
         // Add new values
-        $condition = $this->clearNewCondition(array_merge(
-            array_merge($condition, ['SERIAL_ID' => (string)$this->conditionSerialId]),
+        $condition = array_merge(
+            $condition,
             $data,
-            ['CHANGE_ID' => 'I']
-        ));
+            ['CHANGE_ID' => 'I', 'SERIAL_ID' => (string)$this->conditionSerialId]
+        );
 
         // Add the values to the change parameters.
         $this->addChangeParameters(
@@ -113,23 +113,5 @@ class Contract extends PurchaseDocument
             ['SERIAL_ID'],
             ['ITEM_NOX']
         );
-    }
-
-    /**
-     * Clear of unwanted properties.
-     * 
-     * @param array $condition
-     * 
-     * @return array
-     */
-    private function clearNewCondition(array $condition)
-    {   
-        unset ($condition['SERIAL_ID']);
-        return $condition;
-    }
-
-    public function eval()
-    {
-        eval(\Psy\sh());
     }
 }

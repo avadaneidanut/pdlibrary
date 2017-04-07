@@ -425,7 +425,7 @@ abstract class PurchaseDocument
 
         // Add x table.
         if ($x) {
-            $this->changeParameters[$table . 'X'][] = $this->xTable($values, $ignore, $unset);
+            $this->changeParameters[$table . 'X'][] = $this->xTable($values, $ignore, $unset, $set);
         }
     }
 
