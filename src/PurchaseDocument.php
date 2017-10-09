@@ -101,6 +101,13 @@ abstract class PurchaseDocument
     protected $conditionValidityTable = 'ITEM_COND_VALIDITY';
 
     /**
+     * Header text export table.
+     * 
+     * @var string
+     */
+    protected $headerTextTable = 'HEADER_TEXT';
+
+    /**
      * Array used for executing change RFC. Contains defaults.
      * 
      * @var array
@@ -115,6 +122,13 @@ abstract class PurchaseDocument
     protected $syncParameters = [];
 
     /**
+     * Array used for storing header texts.
+     * 
+     * @var array
+     */
+    protected $headerTexts = [];
+
+    /**
      * Copy of change paramters used in clear function.
      * 
      * @var array
@@ -126,15 +140,20 @@ abstract class PurchaseDocument
      * 
      * @param SAPNWRFC\Connection $sap SAP Connection handle 
      * @param string $number Purchasing Document number
+     * @param array $syncParameters 
+     * @param bool $trace Tracing of bugs
      * @param bool $sync Sync the object with data from SAP
      *  
      * @return void
      */
-    public function __construct(Connection $sap, $number, $trace = false, $sync = true)
+    public function __construct(Connection $sap, $number, $syncParameters = [], $trace = false, $sync = true)
     {
         // Store properties.
         $this->sap = $sap;
         $this->number = $number;
+	if ($syncParameters) {
+            $this->syncParameters = $syncParameters;
+	}
         $this->trace = $trace;
 
         // Sync the data.
@@ -172,31 +191,31 @@ abstract class PurchaseDocument
         }
 
         // Parse the data.
-        // Get a reference to the condition table.
-        $table = &$this->data[$this->itemTable];
+        $table = [];
 
         // Create an assoc array with item_no => item
-        foreach ($table as $key => $item) {
+        foreach ($this->data[$this->itemTable] as $key => $item) {
             $table[$item[$this->itemKey]] = $item;
-            unset($table[$key]);
         }
 
-        // Get a reference to the condition table.
-        $table = &$this->data[$this->conditionTable];
+        $this->data[$this->itemTable] = $table;
+
+        $table = [];
 
         // Create an assoc array with serial_id => condition
-        foreach ($table as $key => $condition) {
+        foreach ($this->data[$this->conditionTable] as $key => $condition) {
             // Realloc the condition.
             $table[$condition[$this->conditionKey]] = $condition;
-            unset($table[$key]);
         }
 
-        // Get a reference to the condition validity  table.
-        $table = &$this->data[$this->conditionValidityTable];
+        $this->data[$this->conditionTable] = $table;
 
-        if ($table) {
+        // Get a reference to the condition validity  table.
+        $table = [];
+
+        if ($this->data[$this->conditionValidityTable]) {
             // Create an assoc array with item_no => validities
-            foreach ($table as $key => $validity) {
+            foreach ($this->data[$this->conditionValidityTable] as $key => $validity) {
                 // Get the item key.
                 $item = $validity[$this->itemKey];
 
@@ -207,10 +226,10 @@ abstract class PurchaseDocument
 
                 // Append the validity.
                 $table[$item][] = $validity;
-                unset($table[$key]);
             }
         }
         
+        $this->data[$this->conditionValidityTable] = $table;
 
         if ($this->trace) {
             print(date('[H:i:s] ') . 'Finished parsing' . ' MB' . PHP_EOL);
@@ -270,13 +289,23 @@ abstract class PurchaseDocument
     }
 
     /**
-     * Get purchase order data
+     * Get purchase order data.
      * 
      * @return array
      */
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * Get the header texts.
+     * 
+     * @return array
+     */
+    public function getHeaderTexts()
+    {
+        return $this->data[$this->headerTextTable];
     }
 
     /**
@@ -306,12 +335,42 @@ abstract class PurchaseDocument
     }
 
     /**
+     * Adds a new header text.
+     * 
+     * @param string $text 
+     * @param string $id
+     * 
+     * @return $this
+     */
+    public function addHeaderText($text, $id)
+    {
+        // We are appending so lets get the old texts back in.
+        if (!isset($this->headerTexts[$id])) {
+            $this->headerTexts[$id] = [];
+            foreach ($this->getHeaderTexts() as $value) {
+                if ($value['TEXT_ID'] == $id) {
+                    $this->headerTexts[$id][] = $value;
+                }
+            }
+        }
+
+        $this->headerTexts[$id][] = [
+                'PO_NUMBER' => $this->number,
+                'TEXT_ID' => $id,
+                'TEXT_FORM' => '* ',
+                'TEXT_LINE' => $text
+        ];
+
+        return $this;
+    }
+
+    /**
      * Adds the specifed item to change parameters.
      * 
      * @param string $item 
      * @param array $values
      *  
-     * @return void
+     * @return $this
      */
     public function updateItem($item, array $values)
     {
@@ -330,7 +389,7 @@ abstract class PurchaseDocument
      * @param string $item 
      * @param string $flag
      *  
-     * @return void
+     * @return $this
      */
     public function deleteItem($item, $flag = 'X')
     {   
@@ -372,6 +431,11 @@ abstract class PurchaseDocument
     {
         // Add purchase document number.
         $this->changeParameters[$this->numberKey] = $this->number;
+
+        // Add header texts if present.
+        if ($this->headerTexts) {
+            $this->changeParameters[$this->headerTextTable] = call_user_func_array('array_merge', $this->headerTexts);
+        }
 
         // Execute RFC.
         $output = $this->call($this->bapiChange, $this->changeParameters);
@@ -491,6 +555,7 @@ abstract class PurchaseDocument
     protected function clear()
     {
         $this->changeParameters = $this->changeParametersCopy;
+        $this->headerTexts = [];
     }
 
     /**

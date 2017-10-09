@@ -57,6 +57,13 @@ class PurchaseOrder extends PurchaseDocument
     protected $conditionKey = 'COND_NO';
 
     /**
+     * Header text export table.
+     * 
+     * @var string
+     */
+    protected $headerTextTable = 'POTEXTHEADER';
+
+    /**
      * Array used for executing change RFC. Contains defaults.
      * 
      * @var array
@@ -65,11 +72,4 @@ class PurchaseOrder extends PurchaseDocument
         'NO_MESSAGING' => 'X',
         'NO_MESSAGE_REQ' => 'X',
     ];
-
-    /**
-     * Array used for executing get detail RFC. Contains defaults.
-     * 
-     * @var array
-     */
-    protected $syncParameters = [];
 }
